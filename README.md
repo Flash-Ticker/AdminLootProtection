@@ -9,7 +9,7 @@
 **Plugin language:** *en*
 **Author:** [@RustFlash](https://github.com/Flash-Ticker)
 
-![RustFlash - Your Favourite Trio Server](https://github.com/Flash-Ticker/ChuteUp-1.0.0/blob/main/chuteup.png)
+![RustFlash - Your Favourite Trio Server](https://github.com/Flash-Ticker/AdminLootProtection-1.0.0/blob/main/AdminLootProtection.png?raw=true)
  
 
 **Features**
