@@ -1,48 +1,58 @@
-using System;
 using Oxide.Core;
-using Oxide.Core.Libraries.Covalence;
+using System;
 using System.Collections.Generic;
 
 namespace Oxide.Plugins
 {
-    [Info("AdminLootProtection", "RustFlash", "1.0.0")]
+    [Info("Admin Loot Protection", "RustFlash", "2.0.0")]
     [Description("Prevents looting admins and specified groups")]
-
-    class AdminLootProtection : CovalencePlugin
+    public class AdminLootProtection : RustPlugin
     {
-        private Dictionary<string, bool> lootProtection = new Dictionary<string, bool>();
-        private const string permissionName = "adminlootprotection.use";
+        public const string PermissionBypass = "adminlootprotection.use";
 
-        private void Init()
+        private void OnServerInitialized()
         {
-            permission.RegisterPermission(permissionName, this);
+            permission.RegisterPermission(PermissionBypass, this);
         }
 
-        private object CanLootPlayer(BasePlayer looter, BasePlayer target)
+        protected override void LoadDefaultMessages()
         {
-            if (looter == null || target == null)
-                return true;
+            lang.RegisterMessages(new Dictionary<string, string>
+            {
+                { "AdminLootPermission", "You are not authorised to loot admins!" },
+            }, this);
+        }
 
-            if (permission.UserHasPermission(looter.UserIDString, permissionName))
-                return "You are not allowed to loot this player.";
-
-            if (IsAdmin(target))
-                return "You are not allowed to loot this admin.";
-
-
+        object CanLootPlayer(BasePlayer target, BasePlayer looter)
+        {
+            if (target.IsAdmin && target.userID != looter.userID && !permission.UserHasPermission(looter.UserIDString, PermissionBypass))
+            {
+                looter.ChatMessage(lang.GetMessage("AdminLootPermission", this, looter.UserIDString));
+                return false;
+            }
             return null;
         }
 
-        private bool IsAdmin(BasePlayer player)
+        object CanLootEntity(BasePlayer player, DroppedItemContainer container)
         {
-            if (player == null)
+            var target = BasePlayer.FindAwakeOrSleeping(container.playerSteamID.ToString());
+            if (target != null && target.IsAdmin && target.userID != player.userID && !permission.UserHasPermission(player.UserIDString, PermissionBypass))
+            {
+                player.ChatMessage(lang.GetMessage("AdminLootPermission", this, player.UserIDString));
                 return false;
+            }
+            return null;
+        }
 
-            if (player.IsAdmin)
-                return true;
-
-
-            return false;
+        object CanLootEntity(BasePlayer player, LootableCorpse corpse)
+        {
+            var target = BasePlayer.FindAwakeOrSleeping(corpse.playerSteamID.ToString());
+            if (target != null && target.IsAdmin && target.userID != player.userID && !permission.UserHasPermission(player.UserIDString, PermissionBypass))
+            {
+                player.ChatMessage(lang.GetMessage("AdminLootPermission", this, player.UserIDString));
+                return false;
+            }
+            return null;
         }
     }
 }
